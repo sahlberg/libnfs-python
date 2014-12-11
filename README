@@ -1,0 +1,103 @@
+This module is an NFS client for python.
+This project is hosted at https://github.com/sahlberg/libnfs-python
+
+The two main classes in this module is NFS and NFSFH.
+NFS represents an NFS context that describes a mount point.
+NFSFH is the main class that imlements a file-like object for NFS files.
+
+
+LICENSE
+=======
+This module is distrubuted under LGPL version 2.1.
+Please see COPYING for the full text of this license.
+
+
+Context-full access
+===================
+In the context-full mode you will first need to mount an NFS share and create
+an NFS context before you can access any files. This NFS context is then used
+for all future access to files in that mount point.
+
+The benefit with this mode is that since performing the actual NFS mount is
+very expensive you only need to perform it once, when creating the NFS object
+and can reuse the mount for any future file you want to access.
+
+In this mode, absolute paths are relative to the mountpoint for the NFS object.
+
+Example:
+--------
+import libnfs
+nfs = libnfs.NFS('nfs://127.0.0.1/data/tmp/')
+a = nfs.open('/foo-test', mode='w+')
+a.write("Test string")
+a.close()
+print nfs.open('/foo-test', mode='r').read()
+
+
+Context-free access
+===================
+This module also provides a mode where you can directly open and access
+a file-like object without first having to instantiate a NFS mount.
+In this case the file-like object will internally create an NFS mount
+for the duration of the lifespan of the file-like object.
+
+In this mode you invoke the libnfs.open() function with an NFS url
+that points to a file :
+
+Example:
+--------
+import libnfs
+a = libnfs.open('nfs://127.0.0.1/data/tmp/foo-test', mode='w+')
+a.write("Test string")
+a.close()
+print libnfs.open('nfs://127.0.0.1/data/tmp/foo-test', mode='r').read()
+
+In the example above we create two instances of a file-like obejct. First
+we create and write to the file and second time we read the file back and
+print it. This is however both expensive and potentially poor performing.
+The reason is that when we use context-free file-like objects we have to
+create an NFS mount internally for each object and this is expensive.
+
+Basically, when creating an NFS mount, the NFS protocol requires that we
+perform the folloing operations/roundtrips :
+
+Creating an NFS context:
+------------------------
+1, Establish TCP connection to portmapper (TCP port 111) on the server.
+2, Send a Portmapper NULL command to verify we are connected to a genuine
+   Portmapper and that it is alive.
+3, Send a Portmapper GetPort command to fetch which port the MOUNT daemon
+   is running on.
+   Close the TCP connection.
+4, Establish a TCP connection to the MOUNT daemon
+5, Send a MOUNT NULL command to verify the MOUNT daemon is alive.
+6, Send a MOUNT MNT command to fetch the NFS file handle for the mount point.
+   Close the TCP connection.
+7, Establish TCP connection to portmapper (TCP port 111) on the server.
+8, Send a Portmapper NULL command to verify we are connected to a genuine
+   Portmapper and that it is alive.
+9, Send a Portmapper GetPort command to fetch which port the DAEMON daemon
+   is running on.
+   Close the TCP connection.
+10, Establish a TCP connection to the NFS daemon
+11, Send a NFS NULL command to verify the NFS daemon is alive.
+12, Send a NFS FSINFO command to fetch some basic information about the
+    filesystem we just mounted.
+13, Send a NFS GETATTR command to fetch some information about the root
+    directory for this mount.
+
+When using context-free handles we have to perform these steps every time
+a new file-like object is create which is very expensive.
+
+The benefit with context-free handles is that they are very convenient to use.
+Just pass an NFS url in to the libnfs.open() function and you have a file-like
+object. The drawback is that every context-free handle have to perform their
+own NFS mount internally. If you plan to access multiple/many files you
+should consider using context-full handles instead.
+
+
+MAILING LIST
+============
+A libnfs-python mailing list is available at
+http://groups.google.com/group/libnfs-python
+Announcements of new versions of libnfs-python will be posted to this list.

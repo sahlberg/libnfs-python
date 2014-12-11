@@ -1,0 +1,10 @@
+This module depends on and provides bindings for libnfs, a userspace NFS
+library hosted at https://github.com/sahlberg/libnfs
+
+Before you can build this module you must first install the latest version
+of libnfs.
+
+Building and installing
+=======================
+sudo python setup.py install
+
