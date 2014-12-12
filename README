@@ -3,12 +3,12 @@ This project is hosted at https://github.com/sahlberg/libnfs-python
 
 The two main classes in this module is NFS and NFSFH.
 NFS represents an NFS context that describes a mount point.
-NFSFH is the main class that imlements a file-like object for NFS files.
+NFSFH is the main class that implements a file-like object for NFS files.
 
 
 LICENSE
 =======
-This module is distrubuted under LGPL version 2.1.
+This module is distributed under LGPL version 2.1.
 Please see COPYING for the full text of this license.
 
 
@@ -22,7 +22,7 @@ The benefit with this mode is that since performing the actual NFS mount is
 very expensive you only need to perform it once, when creating the NFS object
 and can reuse the mount for any future file you want to access.
 
-In this mode, absolute paths are relative to the mountpoint for the NFS object.
+In this mode, absolute paths are relative to the mount point for the NFS object.
 
 Example:
 --------
@@ -52,14 +52,14 @@ a.write("Test string")
 a.close()
 print libnfs.open('nfs://127.0.0.1/data/tmp/foo-test', mode='r').read()
 
-In the example above we create two instances of a file-like obejct. First
+In the example above we create two instances of a file-like object. First
 we create and write to the file and second time we read the file back and
 print it. This is however both expensive and potentially poor performing.
 The reason is that when we use context-free file-like objects we have to
 create an NFS mount internally for each object and this is expensive.
 
 Basically, when creating an NFS mount, the NFS protocol requires that we
-perform the folloing operations/roundtrips :
+perform the following operations/roundtrips :
 
 Creating an NFS context:
 ------------------------
@@ -90,7 +90,7 @@ When using context-free handles we have to perform these steps every time
 a new file-like object is create which is very expensive.
 
 The benefit with context-free handles is that they are very convenient to use.
-Just pass an NFS url in to the libnfs.open() function and you have a file-like
+Just pass an NFS url to the libnfs.open() function and you have a file-like
 object. The drawback is that every context-free handle have to perform their
 own NFS mount internally. If you plan to access multiple/many files you
 should consider using context-full handles instead.
