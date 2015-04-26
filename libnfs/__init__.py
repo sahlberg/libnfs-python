@@ -16,6 +16,26 @@
 import os
 from libnfs import *
 
+def _stat_to_dict(stat):
+        return {'dev': stat.nfs_dev,
+                'ino': stat.nfs_ino,
+                'mode': stat.nfs_mode,
+                'nlink': stat.nfs_nlink,
+                'uid': stat.nfs_uid,
+                'gid': stat.nfs_gid,
+                'rdev': stat.nfs_rdev,
+                'size': stat.nfs_size,
+                'blksize': stat.nfs_blksize,
+                'blocks': stat.nfs_blocks,
+                'atime': {'sec':  stat.nfs_atime,
+                          'nsec': stat.nfs_atime_nsec},
+                'ctime': {'sec':  stat.nfs_ctime,
+                          'nsec': stat.nfs_ctime_nsec},
+                'mtime': {'sec':  stat.nfs_mtime,
+                          'nsec': stat.nfs_mtime_nsec}
+                }
+
+
 class NFSFH(object):
     def __init__(self, nfs, path, mode='r'):
 
@@ -80,6 +100,11 @@ class NFSFH(object):
         count = nfs_read(self._nfs, self._nfsfh, len(buf), buf)
         return buf[:count]
 
+    def fstat(self):
+        _stat = nfs_stat_64()
+        nfs_fstat64(self._nfs, self._nfsfh, _stat)
+        return _stat_to_dict(_stat)
+
     def tell(self):
         _pos = new_uint64_t_ptr()
         nfs_lseek(self._nfs, self._nfsfh, 0, os.SEEK_CUR, _pos)
@@ -131,6 +156,15 @@ class NFS(object):
     def open(self, path, mode='r'):
         return NFSFH(self._nfs, path, mode=mode)
 
+    def stat(self, path):
+        _stat = nfs_stat_64()
+        nfs_stat64(self._nfs, path, _stat)
+        return _stat_to_dict(_stat)
+
+    def lstat(self, path):
+        _stat = nfs_stat_64()
+        nfs_lstat64(self._nfs, path, _stat)
+        return _stat_to_dict(_stat)
 
 def open(url, mode='r'):
     return NFSFH(None, url, mode=mode)
