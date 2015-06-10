@@ -62,9 +62,12 @@ class NFSFH(object):
 
         self._nfsfh = new_NFSFileHandle()
         if _mode & os.O_CREAT:
-            nfs_create(self._nfs, path, _mode, 0664, self._nfsfh)
+            _status = nfs_create(self._nfs, path, _mode, 0664, self._nfsfh)
         else:
-            nfs_open(self._nfs, path, _mode, self._nfsfh)
+            _status = nfs_open(self._nfs, path, _mode, self._nfsfh)
+        if _status != 0:
+            _errmsg = "open failed: %s" % (os.strerror(-_status),)
+            raise ValueError(_errmsg)
         self._nfsfh = NFSFileHandle_value(self._nfsfh)
         self._closed = False
         self._need_flush = False
