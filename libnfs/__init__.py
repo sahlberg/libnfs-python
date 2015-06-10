@@ -113,7 +113,7 @@ class NFSFH(object):
 
     def seek(self, offset, whence=os.SEEK_CUR):
         _pos = new_uint64_t_ptr()
-        nfs_lseek(self._nfs, self._nfsfh, offset, os.whence, _pos)
+        nfs_lseek(self._nfs, self._nfsfh, offset, whence, _pos)
 
     def truncate(self, offset=-1):
         if offset < 0:
