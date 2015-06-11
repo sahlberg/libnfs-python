@@ -145,6 +145,10 @@ class NFSFH(object):
     def closed(self):
         return self._closed
 
+    @property
+    def error(self):
+        return nfs_get_error(self._nfs)
+
 
 class NFS(object):
     def __init__(self, url):
@@ -168,6 +172,10 @@ class NFS(object):
         _stat = nfs_stat_64()
         nfs_lstat64(self._nfs, path, _stat)
         return _stat_to_dict(_stat)
+
+    @property
+    def error(self):
+        return nfs_get_error(self._nfs)
 
 def open(url, mode='r'):
     return NFSFH(None, url, mode=mode)
