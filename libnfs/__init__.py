@@ -62,9 +62,12 @@ class NFSFH(object):
 
         self._nfsfh = new_NFSFileHandle()
         if _mode & os.O_CREAT:
-            nfs_create(self._nfs, path, _mode, 0664, self._nfsfh)
+            _status = nfs_create(self._nfs, path, _mode, 0664, self._nfsfh)
         else:
-            nfs_open(self._nfs, path, _mode, self._nfsfh)
+            _status = nfs_open(self._nfs, path, _mode, self._nfsfh)
+        if _status != 0:
+            _errmsg = "open failed: %s" % (os.strerror(-_status),)
+            raise ValueError(_errmsg)
         self._nfsfh = NFSFileHandle_value(self._nfsfh)
         self._closed = False
         self._need_flush = False
@@ -113,7 +116,7 @@ class NFSFH(object):
 
     def seek(self, offset, whence=os.SEEK_CUR):
         _pos = new_uint64_t_ptr()
-        nfs_lseek(self._nfs, self._nfsfh, offset, os.whence, _pos)
+        nfs_lseek(self._nfs, self._nfsfh, offset, whence, _pos)
 
     def truncate(self, offset=-1):
         if offset < 0:
@@ -142,6 +145,10 @@ class NFSFH(object):
     def closed(self):
         return self._closed
 
+    @property
+    def error(self):
+        return nfs_get_error(self._nfs)
+
 
 class NFS(object):
     def __init__(self, url):
@@ -165,6 +172,10 @@ class NFS(object):
         _stat = nfs_stat_64()
         nfs_lstat64(self._nfs, path, _stat)
         return _stat_to_dict(_stat)
+
+    @property
+    def error(self):
+        return nfs_get_error(self._nfs)
 
 def open(url, mode='r'):
     return NFSFH(None, url, mode=mode)
