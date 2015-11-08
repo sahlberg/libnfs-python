@@ -16,7 +16,8 @@ versrel = version + '-' + release
 readme = 'README'
 download_url = "https://github.com/sahlberg/libnfs-python/libnfs-" + \
                                                           versrel + ".tar.gz"
-long_description = file(readme).read()
+with open(readme, "r") as f:
+    long_description = f.read()
 
 _libnfs = Extension(name='libnfs._libnfs',
                    sources=['libnfs/libnfs_wrap.c'],

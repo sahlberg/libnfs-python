@@ -14,7 +14,7 @@
 #   along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 import os
-from libnfs import *
+from .libnfs import *
 
 def _stat_to_dict(stat):
         return {'dev': stat.nfs_dev,
@@ -62,7 +62,7 @@ class NFSFH(object):
 
         self._nfsfh = new_NFSFileHandle()
         if _mode & os.O_CREAT:
-            _status = nfs_create(self._nfs, path, _mode, 0664, self._nfsfh)
+            _status = nfs_create(self._nfs, path, _mode, 0o664, self._nfsfh)
         else:
             _status = nfs_open(self._nfs, path, _mode, self._nfsfh)
         if _status != 0:
