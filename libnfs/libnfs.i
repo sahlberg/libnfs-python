@@ -26,6 +26,9 @@
 %pointer_functions(struct nfsfh *, NFSFileHandle)
 %pointer_functions(uint64_t, uint64_t_ptr)
 
+%include <pybuffer.i>
+%pybuffer_mutable_string(char *buff);
+
 
 struct rpc_context;
 struct nfs_context;
@@ -112,10 +115,10 @@ extern int nfs_lstat64(struct nfs_context *nfs, const char *path, struct nfs_sta
 extern int nfs_fstat64(struct nfs_context *nfs, struct nfsfh *nfsfh, struct nfs_stat_64 *st);
 extern int nfs_open(struct nfs_context *nfs, const char *path, int flags, struct nfsfh **nfsfh);
 extern int nfs_close(struct nfs_context *nfs, struct nfsfh *nfsfh);
-extern int nfs_pread(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t offset, uint64_t count, char *buf);
-extern int nfs_read(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t count, char *buf);
-extern int nfs_pwrite(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t offset, uint64_t count, char *buf);
-extern int nfs_write(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t count, char *buf);
+extern int nfs_pread(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t offset, uint64_t count, char *buff);
+extern int nfs_read(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t count, char *buff);
+extern int nfs_pwrite(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t offset, uint64_t count, char *buff);
+extern int nfs_write(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t count, char *buff);
 extern int nfs_lseek(struct nfs_context *nfs, struct nfsfh *nfsfh, int64_t offset, int whence, uint64_t *current_offset);
 extern int nfs_fsync(struct nfs_context *nfs, struct nfsfh *nfsfh);
 extern int nfs_truncate(struct nfs_context *nfs, const char *path, uint64_t length);
@@ -131,7 +134,7 @@ extern struct nfsdirent *nfs_readdir(struct nfs_context *nfs, struct nfsdir *nfs
 extern void nfs_closedir(struct nfs_context *nfs, struct nfsdir *nfsdir);
 extern int nfs_chdir(struct nfs_context *nfs, const char *path);
 extern void nfs_getcwd(struct nfs_context *nfs, const char **cwd);
-extern int nfs_readlink(struct nfs_context *nfs, const char *path, char *buf, int bufsize);
+extern int nfs_readlink(struct nfs_context *nfs, const char *path, char *buff, int bufsize);
 extern int nfs_chmod(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_lchmod(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_fchmod(struct nfs_context *nfs, struct nfsfh *nfsfh, int mode);
