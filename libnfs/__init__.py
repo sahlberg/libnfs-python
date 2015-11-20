@@ -14,6 +14,7 @@
 #   along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 from .libnfs import *
 
 def _stat_to_dict(stat):
@@ -37,10 +38,18 @@ def _stat_to_dict(stat):
 
 
 class NFSFH(object):
-    def __init__(self, nfs, path, mode='r'):
+    def __init__(self, nfs, path, mode='r', codec=None):
 
         self._nfs = nfs
         self._name = path
+
+        if codec:
+            self._codec = codec
+        elif sys.version_info[0] > 2:
+            self._codec = 'utf-8'
+        else:
+            self._codec = None
+        self._binary = True if 'b' in mode else False
 
         if path[:6] == "nfs://":
             _pos = path.rfind('/')
@@ -82,12 +91,18 @@ class NFSFH(object):
         nfs_close(self._nfs, self._nfsfh)
         self._closed = True
 
-    def write(self, str):
+    def write(self, data):
         if self._closed:
             raise ValueError('I/O operation on closed file');
         if not self._writing:
             raise IOError('Trying to write on file open for reading');
-        nfs_write(self._nfs, self._nfsfh, len(str), str)
+
+        if not isinstance(data, bytearray):
+            if self._codec:
+                data = bytearray(data.encode(self._codec))
+            else:
+                data = bytearray(data)
+        nfs_write(self._nfs, self._nfsfh, len(data), data)
         self._need_flush = True
 
     def read(self, size=-1):
@@ -99,9 +114,15 @@ class NFSFH(object):
 
             size = _st.nfs_size - _pos
 
-        buf = str(bytearray(size))
+        buf = bytearray(size)
         count = nfs_read(self._nfs, self._nfsfh, len(buf), buf)
-        return buf[:count]
+        if self._binary:
+            return buf[:count]
+
+        if self._codec:
+            return buf[:count].decode(self._codec)
+        else:
+            return str(buf[:count])
 
     def fstat(self):
         _stat = nfs_stat_64()
@@ -160,8 +181,8 @@ class NFS(object):
         nfs_destroy_url(self._url)
         nfs_destroy_context(self._nfs)
 
-    def open(self, path, mode='r'):
-        return NFSFH(self._nfs, path, mode=mode)
+    def open(self, path, mode='r', codec=None):
+        return NFSFH(self._nfs, path, mode=mode, codec=codec)
 
     def stat(self, path):
         _stat = nfs_stat_64()
@@ -177,6 +198,6 @@ class NFS(object):
     def error(self):
         return nfs_get_error(self._nfs)
 
-def open(url, mode='r'):
-    return NFSFH(None, url, mode=mode)
+def open(url, mode='r', codec=None):
+    return NFSFH(None, url, mode=mode, codec=codec)
 
