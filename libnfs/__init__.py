@@ -194,6 +194,9 @@ class NFS(object):
         nfs_lstat64(self._nfs, path, _stat)
         return _stat_to_dict(_stat)
 
+    def unlink(self, path):
+        return nfs_unlink(self._nfs, path)
+    
     @property
     def error(self):
         return nfs_get_error(self._nfs)
