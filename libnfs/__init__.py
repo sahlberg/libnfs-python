@@ -197,9 +197,15 @@ class NFS(object):
     def unlink(self, path):
         return nfs_unlink(self._nfs, path)
     
-    @property
-    def error(self):
-        return nfs_get_error(self._nfs)
+    def mkdir(self, path):
+        return nfs_mkdir(self._nfs, path)
+
+    def rmdir(self, path):
+        return nfs_rmdir(self._nfs, path)
+
+@property
+def error(self):
+    return nfs_get_error(self._nfs)
 
 def open(url, mode='r', codec=None):
     return NFSFH(None, url, mode=mode, codec=codec)
