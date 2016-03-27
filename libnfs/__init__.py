@@ -13,9 +13,17 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program; if not, see <http://www.gnu.org/licenses/>.
 
+import errno
 import os
 import sys
 from .libnfs import *
+
+class Error(Exception):
+    pass
+
+class NoentError(Error):
+    def __init__(self):
+        self.msg = '[ENOENT] No such file or directory'
 
 def _stat_to_dict(stat):
         return {'dev': stat.nfs_dev,
@@ -74,6 +82,8 @@ class NFSFH(object):
             _status = nfs_create(self._nfs, path, _mode, 0o664, self._nfsfh)
         else:
             _status = nfs_open(self._nfs, path, _mode, self._nfsfh)
+        if _status == -errno.ENOENT:
+                raise NoentError()
         if _status != 0:
             _errmsg = "open failed: %s" % (os.strerror(-_status),)
             raise ValueError(_errmsg)
@@ -186,22 +196,35 @@ class NFS(object):
 
     def stat(self, path):
         _stat = nfs_stat_64()
-        nfs_stat64(self._nfs, path, _stat)
+        ret = nfs_stat64(self._nfs, path, _stat)
+        if ret == -errno.ENOENT:
+                raise NoentError()
         return _stat_to_dict(_stat)
 
     def lstat(self, path):
         _stat = nfs_stat_64()
-        nfs_lstat64(self._nfs, path, _stat)
+        ret = nfs_lstat64(self._nfs, path, _stat)
+        if ret == -errno.ENOENT:
+                raise NoentError()
         return _stat_to_dict(_stat)
 
     def unlink(self, path):
-        return nfs_unlink(self._nfs, path)
-    
+        ret = nfs_unlink(self._nfs, path)
+        if ret == -errno.ENOENT:
+                raise NoentError()
+        return ret
+
     def mkdir(self, path):
-        return nfs_mkdir(self._nfs, path)
+        ret = nfs_mkdir(self._nfs, path)
+        if ret == -errno.ENOENT:
+                raise NoentError()
+        return ret
 
     def rmdir(self, path):
-        return nfs_rmdir(self._nfs, path)
+        ret = nfs_rmdir(self._nfs, path)
+        if ret == -errno.ENOENT:
+                raise NoentError()
+        return ret
 
 @property
 def error(self):
