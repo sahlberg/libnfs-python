@@ -18,13 +18,6 @@ import os
 import sys
 from .libnfs import *
 
-class Error(Exception):
-    pass
-
-class NoentError(Error):
-    def __init__(self):
-        self.msg = '[ENOENT] No such file or directory'
-
 def _stat_to_dict(stat):
         return {'dev': stat.nfs_dev,
                 'ino': stat.nfs_ino,
@@ -83,7 +76,7 @@ class NFSFH(object):
         else:
             _status = nfs_open(self._nfs, path, _mode, self._nfsfh)
         if _status == -errno.ENOENT:
-                raise NoentError()
+                raise IOError(errno.ENOENT, 'No such file or directory');
         if _status != 0:
             _errmsg = "open failed: %s" % (os.strerror(-_status),)
             raise ValueError(_errmsg)
@@ -198,32 +191,32 @@ class NFS(object):
         _stat = nfs_stat_64()
         ret = nfs_stat64(self._nfs, path, _stat)
         if ret == -errno.ENOENT:
-                raise NoentError()
+                raise IOError(errno.ENOENT, 'No such file or directory');
         return _stat_to_dict(_stat)
 
     def lstat(self, path):
         _stat = nfs_stat_64()
         ret = nfs_lstat64(self._nfs, path, _stat)
         if ret == -errno.ENOENT:
-                raise NoentError()
+                raise IOError(errno.ENOENT, 'No such file or directory');
         return _stat_to_dict(_stat)
 
     def unlink(self, path):
         ret = nfs_unlink(self._nfs, path)
         if ret == -errno.ENOENT:
-                raise NoentError()
+                raise IOError(errno.ENOENT, 'No such file or directory');
         return ret
 
     def mkdir(self, path):
         ret = nfs_mkdir(self._nfs, path)
         if ret == -errno.ENOENT:
-                raise NoentError()
+                raise IOError(errno.ENOENT, 'No such file or directory');
         return ret
 
     def rmdir(self, path):
         ret = nfs_rmdir(self._nfs, path)
         if ret == -errno.ENOENT:
-                raise NoentError()
+                raise IOError(errno.ENOENT, 'No such file or directory');
         return ret
 
 @property
