@@ -219,6 +219,22 @@ class NFS(object):
                 raise IOError(errno.ENOENT, 'No such file or directory');
         return ret
 
+    def listdir(self, path):
+        d = new_NFSDirHandle()
+        ret = nfs_opendir(self._nfs, path, d)
+        if ret == -errno.ENOENT:
+                raise IOError(errno.ENOENT, 'No such file or directory');
+        d = NFSDirHandle_value(d)
+
+        ret = []
+        while True:
+                de = nfs_readdir(self._nfs, d)
+                if de == None:
+                        break
+
+                ret.append(de.name)
+        return ret
+
 @property
 def error(self):
     return nfs_get_error(self._nfs)

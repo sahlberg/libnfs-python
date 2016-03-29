@@ -25,6 +25,7 @@
 %include <cpointer.i>
 %pointer_functions(struct nfsfh *, NFSFileHandle)
 %pointer_functions(uint64_t, uint64_t_ptr)
+%pointer_functions(struct nfsdir *, NFSDirHandle)
 
 %include <pybuffer.i>
 %pybuffer_mutable_string(char *buff);
