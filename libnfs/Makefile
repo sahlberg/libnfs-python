@@ -15,4 +15,4 @@ _libnfs.so: libnfs_wrap.o
 	${CC} libnfs_wrap.o -shared $$(python${PYVER}-config --ldflags) -o _libnfs.so ${LIBS}
 
 clean:
-	rm -f *.o *.so *.pyc
+	rm -f *.o *.so *.pyc libnfs_wrap.c libnfs.py
