@@ -43,6 +43,8 @@ setup(name = name,
           'Programming Language :: C',
           'Programming Language :: Python',
           'Topic :: Software Development :: Libraries :: Python Modules',
+          'Topic :: Communications :: File Sharing',
+          'Topic :: System :: Filesystems',
       ],
       ext_modules = [_libnfs],
       )
