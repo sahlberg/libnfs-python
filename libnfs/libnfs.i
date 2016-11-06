@@ -36,6 +36,11 @@ struct nfs_context;
 struct AUTH;
 struct nfsfh;
 
+struct timeval {
+        uint64_t tv_sec;
+        uint64_t tv_usec;
+};
+
 struct nfs_url {
 	char *server;
 	char *path;
