@@ -1,7 +1,7 @@
 This module is an NFS client for python.
 This project is hosted at https://github.com/sahlberg/libnfs-python
 
-The two main classes in this module is NFS and NFSFH.
+The two main classes in this module are NFS and NFSFH.
 NFS represents an NFS context that describes a mount point.
 NFSFH is the main class that implements a file-like object for NFS files.
 
@@ -20,9 +20,9 @@ for all future access to files in that mount point.
 
 The benefit with this mode is that since performing the actual NFS mount is
 very expensive you only need to perform it once, when creating the NFS object
-and can reuse the mount for any future file you want to access.
+and can reuse the mount for any future files you want to access.
 
-In this mode, absolute paths are relative to the mount point for the NFS object.
+In this mode absolute paths are relative to the mount point for the NFS object.
 
 Example:
 --------
@@ -87,7 +87,7 @@ Creating an NFS context:
     directory for this mount.
 
 When using context-free handles we have to perform these steps every time
-a new file-like object is create which is very expensive.
+a new file-like object is created making it very expensive.
 
 The benefit with context-free handles is that they are very convenient to use.
 Just pass an NFS url to the libnfs.open() function and you have a file-like
