@@ -11,7 +11,7 @@ except ImportError:
 
 name = 'libnfs'
 version = '1.0'
-release = '3'
+release = '4'
 versrel = version + '-' + release
 readme = 'README'
 download_url = "https://github.com/sahlberg/libnfs-python/libnfs-" + \
@@ -27,7 +27,7 @@ _libnfs = Extension(name='libnfs._libnfs',
 
 setup(name = name,
       version = versrel,
-      description = 'A libnfs wrapper for Python.',
+      description = 'NFS client for Python.',
       long_description = long_description,
       license = 'LGPLv2.1',
       platforms = ['any'],

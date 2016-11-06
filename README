@@ -1,6 +1,11 @@
 This module is an NFS client for python.
 This project is hosted at https://github.com/sahlberg/libnfs-python
 
+This module depends on the libnfs library.
+You must first install libnfs before you can use this module.
+Libnfs can be found at https://github.com/sahlberg/libnfs
+
+
 The two main classes in this module are NFS and NFSFH.
 NFS represents an NFS context that describes a mount point.
 NFSFH is the main class that implements a file-like object for NFS files.
