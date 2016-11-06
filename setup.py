@@ -11,7 +11,7 @@ except ImportError:
 
 name = 'libnfs'
 version = '1.0'
-release = '1'
+release = '3'
 versrel = version + '-' + release
 readme = 'README'
 download_url = "https://github.com/sahlberg/libnfs-python/libnfs-" + \
