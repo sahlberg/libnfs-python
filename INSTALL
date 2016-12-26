@@ -6,5 +6,7 @@ of libnfs.
 
 Building and installing
 =======================
+cd  libnfs
+make
+cd ..
 sudo python setup.py install
-
