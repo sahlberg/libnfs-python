@@ -234,6 +234,36 @@ class NFS(object):
                 ret.append(de.name)
         return ret
 
+    def makedirs(self, path):
+        npath = "/"
+        for p in path.split(os.path.sep):
+            npath = os.path.join(npath, p)
+            self.mkdir(npath)
+
+    def rawstat(self, path):
+        _stat = nfs_stat_64()
+        ret = nfs_stat64(self._nfs, path, _stat)
+        if ret == -errno.ENOENT:
+                raise IOError(errno.ENOENT, 'No such file or directory')
+        return _stat
+
+    def isfile(self, path):
+        """Test whether a path is a regular file"""
+        try:
+            st = self.rawstat(path)
+        except IOError:
+            return False
+        return stat.S_ISREG(st.nfs_mode)
+
+    def isdir(self, s):
+        """Return true if the pathname refers to an existing directory."""
+        try:
+            st = self.rawstat(s)
+        except IOError:
+            return False
+        return stat.S_ISDIR(st.nfs_mode)
+
+
 @property
 def error(self):
     return nfs_get_error(self._nfs)
