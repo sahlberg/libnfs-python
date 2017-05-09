@@ -158,3 +158,5 @@ extern struct exportnode *mount_getexports(const char *server);
 extern void mount_free_export_list(struct exportnode *exports);
 extern struct nfs_server_list *nfs_find_local_servers(void);
 extern void free_nfs_srvr_list(struct nfs_server_list *srv);
+extern void nfs_set_timeout(struct nfs_context *nfs, int milliseconds);
+extern int nfs_get_timeout(struct nfs_context *nfs);
