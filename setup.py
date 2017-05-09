@@ -45,6 +45,8 @@ with open(readme, "r") as f:
 _libnfs = Extension(name='libnfs._libnfs',
                    sources=['libnfs/libnfs.i'],
                    swig_opts=['-shadow', '-threads'],
+                   extra_link_args=['-g'],
+                   extra_compile_args=['-g'],
                    libraries=['nfs'],
 )
 
