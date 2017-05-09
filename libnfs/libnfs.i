@@ -30,6 +30,50 @@
 %include <pybuffer.i>
 %pybuffer_mutable_string(char *buff);
 
+/* Map char ** to Python list
+ *
+ * This is based on http://www.swig.org/Doc1.3/Python.html#Python_nn59
+ * and is intended to deal with cases where a caller has a char *buf,
+ * passes &buf in order to have the function return a pointer.
+ *
+ *  extern void nfs_getcwd(struct nfs_context *nfs, const char **cwd);
+ *
+ * The approach taken here is to retain the general form of the
+ * function signature, and model the output parameter using a
+ * Python list which will be modified to return the result.
+ * This allows the caller to use the idiom:
+ *
+ *  cwd = []
+ *  nfs_getcwd(nfs, cwd)
+ *  print cwd[0]
+ */
+%typemap(in) char ** (char *buf = NULL) {
+    if (!PyList_Check($input)) {
+        PyErr_SetString(PyExc_TypeError,"not a list");
+        SWIG_fail;
+    } else {
+        if (PyList_SetSlice($input, 0, PyList_Size($input), NULL)) {
+            SWIG_fail;
+        }
+    }
+    $1 = &buf;
+}
+%typemap(argout) char ** {
+    if (*$1 != NULL) {
+        int rc;
+        PyObject *symlink = PyString_FromString(*$1);
+        if (symlink == NULL)
+            SWIG_fail;
+        rc = PyList_Insert($input, 0, symlink);
+        Py_DECREF(symlink);
+        if (rc)
+            SWIG_fail;
+    }
+}
+%typemap(freearg) char ** {
+    if ($1 != NULL)
+        free(*$1);
+}
 
 struct rpc_context;
 struct nfs_context;
@@ -130,6 +174,7 @@ extern int nfs_fsync(struct nfs_context *nfs, struct nfsfh *nfsfh);
 extern int nfs_truncate(struct nfs_context *nfs, const char *path, uint64_t length);
 extern int nfs_ftruncate(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t length);
 extern int nfs_mkdir(struct nfs_context *nfs, const char *path);
+extern int nfs_mkdir2(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_rmdir(struct nfs_context *nfs, const char *path);
 extern int nfs_creat(struct nfs_context *nfs, const char *path, int mode, struct nfsfh **nfsfh);
 extern int nfs_create(struct nfs_context *nfs, const char *path, int flags, int mode, struct nfsfh **nfsfh);
@@ -141,6 +186,7 @@ extern void nfs_closedir(struct nfs_context *nfs, struct nfsdir *nfsdir);
 extern int nfs_chdir(struct nfs_context *nfs, const char *path);
 extern void nfs_getcwd(struct nfs_context *nfs, const char **cwd);
 extern int nfs_readlink(struct nfs_context *nfs, const char *path, char *buff, int bufsize);
+extern int nfs_readlink2(struct nfs_context *nfs, const char *path, char **buf);
 extern int nfs_chmod(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_lchmod(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_fchmod(struct nfs_context *nfs, struct nfsfh *nfsfh, int mode);
@@ -158,3 +204,5 @@ extern struct exportnode *mount_getexports(const char *server);
 extern void mount_free_export_list(struct exportnode *exports);
 extern struct nfs_server_list *nfs_find_local_servers(void);
 extern void free_nfs_srvr_list(struct nfs_server_list *srv);
+extern void nfs_set_timeout(struct nfs_context *nfs, int milliseconds);
+extern int nfs_get_timeout(struct nfs_context *nfs);

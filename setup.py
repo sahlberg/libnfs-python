@@ -8,6 +8,29 @@ except ImportError:
     from distutils.core import setup, Extension
     from distutils.command.build_ext import build_ext
 
+# Although setuptools supports swig, it fails to copy the generated
+# Python wrapper: http://stackoverflow.com/questions/12491328
+
+cmdclass = { }
+
+try:
+    from setuptools.command.install import install
+except ImportError:
+    pass
+else:
+    class Install(install):
+        def run(self):
+            self.run_command('build_ext')
+            install.run(self)
+    cmdclass['install'] = Install
+
+from distutils.command.build import build
+
+class Build(build):
+    def run(self):
+        self.run_command('build_ext')
+        build.run(self)
+cmdclass['build'] = Build
 
 name = 'libnfs'
 version = '1.0'
@@ -20,7 +43,10 @@ with open(readme, "r") as f:
     long_description = f.read()
 
 _libnfs = Extension(name='libnfs._libnfs',
-                   sources=['libnfs/libnfs_wrap.c'],
+                   sources=['libnfs/libnfs.i'],
+                   swig_opts=['-shadow', '-threads'],
+                   extra_link_args=['-g'],
+                   extra_compile_args=['-g'],
                    libraries=['nfs'],
 )
 
@@ -47,4 +73,5 @@ setup(name = name,
           'Topic :: System :: Filesystems',
       ],
       ext_modules = [_libnfs],
+      cmdclass = cmdclass,
       )
