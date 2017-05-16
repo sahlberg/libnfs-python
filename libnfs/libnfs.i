@@ -26,6 +26,8 @@
 %pointer_functions(struct nfsfh *, NFSFileHandle)
 %pointer_functions(uint64_t, uint64_t_ptr)
 %pointer_functions(struct nfsdir *, NFSDirHandle)
+%include <carrays.i>
+%array_functions(struct timeval, TimeValArray)
 
 %include <pybuffer.i>
 %pybuffer_mutable_string(char *buff);
@@ -193,8 +195,8 @@ extern int nfs_fchmod(struct nfs_context *nfs, struct nfsfh *nfsfh, int mode);
 extern int nfs_chown(struct nfs_context *nfs, const char *path, int uid, int gid);
 extern int nfs_lchown(struct nfs_context *nfs, const char *path, int uid, int gid);
 extern int nfs_fchown(struct nfs_context *nfs, struct nfsfh *nfsfh, int uid, int gid);
-extern int nfs_utimes(struct nfs_context *nfs, const char *path, struct timeval *times);
-extern int nfs_lutimes(struct nfs_context *nfs, const char *path, struct timeval *times);
+extern int nfs_utimes(struct nfs_context *nfs, const char *path, struct timeval times[2]);
+extern int nfs_lutimes(struct nfs_context *nfs, const char *path, struct timeval times[2]);
 extern int nfs_utime(struct nfs_context *nfs, const char *path, struct utimbuf *times);
 extern int nfs_access(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_symlink(struct nfs_context *nfs, const char *oldpath, const char *newpath);
