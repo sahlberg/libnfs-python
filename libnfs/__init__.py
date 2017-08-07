@@ -263,6 +263,13 @@ class NFS(object):
             return False
         return stat.S_ISDIR(st.nfs_mode)
 
+    def rename(self, src, dst):
+        """Rename file"""
+        ret = nfs_rename(src, dst)
+        if ret == -errno.ENOENT:
+            raise IOError(errno.ENOENT, 'No such file or directory')
+        return ret
+
 
 @property
 def error(self):
