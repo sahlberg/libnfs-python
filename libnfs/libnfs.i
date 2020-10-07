@@ -15,6 +15,11 @@
    along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+Update: 10/7/2020
+   - Comment out nfs_mkdir2 and nfs_readlink2 to avoid build issues.
+*/
+
 %module libnfs
 
 %{

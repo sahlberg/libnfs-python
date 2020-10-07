@@ -1,6 +1,11 @@
 #!/usr/bin/env python
-from os import environ
 
+# Update: 10/7/2020
+#   - Package name
+#   - Change release and version number
+
+
+from os import environ
 try:
     from setuptools import setup, Extension
     from setuptools.command.build_ext import build_ext
@@ -37,10 +42,10 @@ class Build(build):
 cmdclass['build'] = Build
 
 
-name = 'libnfs'
-version = '1.1'
-release = '1'
-versrel = version + '-' + release
+name = 'dcc-libnfs-python'
+version = '1.0'
+release = '5'
+versrel = version + '.' + release
 readme = 'README'
 download_url = "https://github.com/sahlberg/libnfs-python/libnfs-" + \
                                                           versrel + ".tar.gz"

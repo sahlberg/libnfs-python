@@ -13,6 +13,13 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with this program; if not, see <http://www.gnu.org/licenses/>.
 
+#
+# Update: 10/7/2020
+#   - Add a check for mount request failure
+#   - Update NFS class to check all error codes returned from external
+#     library (C program) and raise exception.
+#
+
 import errno
 import os
 import sys

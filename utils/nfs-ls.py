@@ -2,6 +2,10 @@
 # coding: utf-8
 #
 # Example program to list content of NFS directory
+#
+# Update: 10/7/2020
+#   - Update print statement to a function call to comply with Python 3
+#     syntax.
 
 import sys
 import libnfs
