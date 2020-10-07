@@ -176,7 +176,7 @@ extern int nfs_fsync(struct nfs_context *nfs, struct nfsfh *nfsfh);
 extern int nfs_truncate(struct nfs_context *nfs, const char *path, uint64_t length);
 extern int nfs_ftruncate(struct nfs_context *nfs, struct nfsfh *nfsfh, uint64_t length);
 extern int nfs_mkdir(struct nfs_context *nfs, const char *path);
-extern int nfs_mkdir2(struct nfs_context *nfs, const char *path, int mode);
+/* extern int nfs_mkdir2(struct nfs_context *nfs, const char *path, int mode); */
 extern int nfs_rmdir(struct nfs_context *nfs, const char *path);
 extern int nfs_creat(struct nfs_context *nfs, const char *path, int mode, struct nfsfh **nfsfh);
 extern int nfs_create(struct nfs_context *nfs, const char *path, int flags, int mode, struct nfsfh **nfsfh);
@@ -188,7 +188,7 @@ extern void nfs_closedir(struct nfs_context *nfs, struct nfsdir *nfsdir);
 extern int nfs_chdir(struct nfs_context *nfs, const char *path);
 extern void nfs_getcwd(struct nfs_context *nfs, const char **cwd);
 extern int nfs_readlink(struct nfs_context *nfs, const char *path, char *buff, int bufsize);
-extern int nfs_readlink2(struct nfs_context *nfs, const char *path, char **buf);
+/* extern int nfs_readlink2(struct nfs_context *nfs, const char *path, char **buf); */
 extern int nfs_chmod(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_lchmod(struct nfs_context *nfs, const char *path, int mode);
 extern int nfs_fchmod(struct nfs_context *nfs, struct nfsfh *nfsfh, int mode);
