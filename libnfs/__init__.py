@@ -16,26 +16,34 @@
 import errno
 import os
 import sys
-from .libnfs import *
+from libnfs.libnfs import *
+
 
 def _stat_to_dict(stat):
-        return {'dev': stat.nfs_dev,
-                'ino': stat.nfs_ino,
-                'mode': stat.nfs_mode,
-                'nlink': stat.nfs_nlink,
-                'uid': stat.nfs_uid,
-                'gid': stat.nfs_gid,
-                'rdev': stat.nfs_rdev,
-                'size': stat.nfs_size,
-                'blksize': stat.nfs_blksize,
-                'blocks': stat.nfs_blocks,
-                'atime': {'sec':  stat.nfs_atime,
-                          'nsec': stat.nfs_atime_nsec},
-                'ctime': {'sec':  stat.nfs_ctime,
-                          'nsec': stat.nfs_ctime_nsec},
-                'mtime': {'sec':  stat.nfs_mtime,
-                          'nsec': stat.nfs_mtime_nsec}
-                }
+    return {
+        'dev': stat.nfs_dev,
+        'ino': stat.nfs_ino,
+        'mode': stat.nfs_mode,
+        'nlink': stat.nfs_nlink,
+        'uid': stat.nfs_uid,
+        'gid': stat.nfs_gid,
+        'rdev': stat.nfs_rdev,
+        'size': stat.nfs_size,
+        'blksize': stat.nfs_blksize,
+        'blocks': stat.nfs_blocks,
+        'atime': {
+            'sec':  stat.nfs_atime,
+            'nsec': stat.nfs_atime_nsec
+        },
+        'ctime': {
+            'sec':  stat.nfs_ctime,
+            'nsec': stat.nfs_ctime_nsec
+        },
+        'mtime': {
+            'sec':  stat.nfs_mtime,
+            'nsec': stat.nfs_mtime_nsec
+        }
+    }
 
 
 class NFSFH(object):
@@ -177,7 +185,12 @@ class NFS(object):
     def __init__(self, url):
         self._nfs = nfs_init_context()
         self._url = nfs_parse_url_dir(self._nfs, url)
-        nfs_mount(self._nfs, self._url.server, self._url.path)
+        ret = nfs_mount(self._nfs, self._url.server, self._url.path)
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to mount {url}. {self.error}'
+            )
 
     def __del__(self):
         nfs_destroy_url(self._url)
@@ -189,40 +202,58 @@ class NFS(object):
     def stat(self, path):
         _stat = nfs_stat_64()
         ret = nfs_stat64(self._nfs, path, _stat)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory');
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to get {path} file status (stat). {self.error}'
+            )
         return _stat_to_dict(_stat)
 
     def lstat(self, path):
         _stat = nfs_stat_64()
         ret = nfs_lstat64(self._nfs, path, _stat)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory');
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to get {path} file status (lstat). {self.error}'
+            )
         return _stat_to_dict(_stat)
 
     def unlink(self, path):
         ret = nfs_unlink(self._nfs, path)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory');
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to unlink {path}. {self.error}'
+            )
         return ret
 
     def mkdir(self, path):
         ret = nfs_mkdir(self._nfs, path)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory');
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to create {path} directory. {self.error}'
+            )
         return ret
 
     def rmdir(self, path):
         ret = nfs_rmdir(self._nfs, path)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory');
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to remove {path} directory. {self.error}'
+            )
         return ret
 
     def listdir(self, path):
         d = new_NFSDirHandle()
         ret = nfs_opendir(self._nfs, path, d)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory');
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed list {path} directory. {self.error}'
+            )
         d = NFSDirHandle_value(d)
 
         ret = []
@@ -235,46 +266,55 @@ class NFS(object):
         return ret
 
     def makedirs(self, path):
-        npath = "/"
-        for p in path.split(os.path.sep):
-            npath = os.path.join(npath, p)
-            self.mkdir(npath)
+        try:
+            npath = "/"
+            for p in path.split(os.path.sep):
+                npath = os.path.join(npath, p)
+                self.mkdir(npath)
+        except Exception:
+            raise
 
     def rawstat(self, path):
         _stat = nfs_stat_64()
         ret = nfs_stat64(self._nfs, path, _stat)
-        if ret == -errno.ENOENT:
-                raise IOError(errno.ENOENT, 'No such file or directory')
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to get {path} raw statistics. {self.error}'
+            )
         return _stat
 
     def isfile(self, path):
         """Test whether a path is a regular file"""
         try:
             st = self.rawstat(path)
+            return stat.S_ISREG(st.nfs_mode)
         except IOError:
             return False
-        return stat.S_ISREG(st.nfs_mode)
+        except Exception:
+            raise
 
     def isdir(self, s):
         """Return true if the pathname refers to an existing directory."""
         try:
             st = self.rawstat(s)
+            return stat.S_ISDIR(st.nfs_mode)
         except IOError:
             return False
-        return stat.S_ISDIR(st.nfs_mode)
+        except Exception:
+            raise
 
     def rename(self, src, dst):
         """Rename file"""
         ret = nfs_rename(src, dst)
-        if ret == -errno.ENOENT:
-            raise IOError(errno.ENOENT, 'No such file or directory')
+        if ret:
+            raise IOError(
+                ret,
+                f'Failed to rename {src} file. {self.error}'
+            )
         return ret
 
-
-@property
-def error(self):
-    return nfs_get_error(self._nfs)
-
-def open(url, mode='r', codec=None):
-    return NFSFH(None, url, mode=mode, codec=codec)
+    @property
+    def error(self):
+        return nfs_get_error(self._nfs)
 
