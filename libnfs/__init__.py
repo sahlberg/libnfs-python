@@ -15,6 +15,7 @@
 
 import errno
 import os
+import stat
 import sys
 from .libnfs import *
 
