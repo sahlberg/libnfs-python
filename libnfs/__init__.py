@@ -178,7 +178,9 @@ class NFS(object):
     def __init__(self, url):
         self._nfs = nfs_init_context()
         self._url = nfs_parse_url_dir(self._nfs, url)
-        nfs_mount(self._nfs, self._url.server, self._url.path)
+        ret = nfs_mount(self._nfs, self._url.server, self._url.path)
+        if ret != 0:
+            raise IOError(nfs_get_error(self._nfs))
 
     def __del__(self):
         nfs_destroy_url(self._url)
