@@ -17,6 +17,7 @@ import errno
 import os
 import stat
 import sys
+import stat
 from .libnfs import *
 
 def _stat_to_dict(stat):
