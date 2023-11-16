@@ -268,7 +268,7 @@ class NFS(object):
 
     def rename(self, src, dst):
         """Rename file"""
-        ret = nfs_rename(src, dst)
+        ret = nfs_rename(self._nfs, src, dst)
         if ret == -errno.ENOENT:
             raise IOError(errno.ENOENT, 'No such file or directory')
         return ret
